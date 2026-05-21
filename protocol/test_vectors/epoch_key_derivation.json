@@ -1,0 +1,23 @@
+[
+  {
+    "master_key_hex": "0000000000000000000000000000000000000000000000000000000000000000",
+    "epoch": 0,
+    "expected_enc_key_hex": "1047c4bf665eae18f0f65e54681997fd875db69bc249894abb2957f32988a153",
+    "expected_search_key_hex": "101bf1ba2d3599aaadb8c983b305c932210009d78193454c7ad23951186d0781",
+    "expected_audit_key_hex": "4d5ba2597103eac4b5a73dd4015c40cc802370b30b333cd04f055c571c58a741"
+  },
+  {
+    "master_key_hex": "0101010101010101010101010101010101010101010101010101010101010101",
+    "epoch": 1,
+    "expected_enc_key_hex": "cf6087915cc13cd0fd1ad3fc89b985153a1a735d49f6f6fbadbf12e6b9234472",
+    "expected_search_key_hex": "776b825b88010318ad59b2f3d095d33126dec437c0da23e192e7a7d6fb3a3e3f",
+    "expected_audit_key_hex": "4861402b1e2c2d47cbb9c36a13ab8b5c34d9ba4a81bb310199daaa6a28b44229"
+  },
+  {
+    "master_key_hex": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+    "epoch": 65535,
+    "expected_enc_key_hex": "a46d89c35d9080093eb1373af5db12028f1d5dffdc106046ad67e4f365d19ee4",
+    "expected_search_key_hex": "ecb1fb6b56cbe108cb733edebf1bf93883251fe448b6584202404c15460bd414",
+    "expected_audit_key_hex": "6870b629b275c6e603617db9c4f6edd23e1301d211ab597f94fd5b29dfb9abcb"
+  }
+]

@@ -1,0 +1,11 @@
+{
+  "note": "Shamir 2-of-3 round-trip test. Shares are non-deterministic (random polynomial), so only the round-trip property is tested, not specific share values.",
+  "vectors": [
+    {
+      "secret_hex": "a1b2c3d4e5f60718293a4b5c6d7e8f90a1b2c3d4e5f60718293a4b5c6d7e8f90",
+      "threshold": 2,
+      "total_shares": 3,
+      "test": "split then reconstruct with any 2 shares must return original secret"
+    }
+  ]
+}

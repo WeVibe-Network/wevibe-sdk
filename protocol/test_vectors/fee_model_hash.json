@@ -1,0 +1,47 @@
+{
+  "description": "Cross-language canonical hash test vectors for FeeModel. Go and TypeScript must produce identical output.",
+  "vectors": [
+    {
+      "name": "empty",
+      "input": null,
+      "canonical": "{}",
+      "sha256_hex": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a"
+    },
+    {
+      "name": "empty_object",
+      "input": {},
+      "canonical": "{}",
+      "sha256_hex": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a"
+    },
+    {
+      "name": "tier_only",
+      "input": {"tier": "free"},
+      "canonical": "{\"tier\":\"free\"}",
+      "sha256_hex": "d3b5fee3071872fadebb1db437989566c66ab249329e9a136936c777c3ae7e07"
+    },
+    {
+      "name": "all_fields",
+      "input": {
+        "tier": "pro",
+        "monthly_credits": 10000,
+        "per_query_cost": 1,
+        "overage_multiplier": 1.5,
+        "currency": "USD"
+      },
+      "canonical": "{\"tier\":\"pro\",\"monthly_credits\":10000,\"per_query_cost\":1,\"overage_multiplier\":1.5,\"currency\":\"USD\"}",
+      "sha256_hex": "51ba5aa2eb64689a3d1b426ccb15b8f64fe050cae45d2a2d50cfaa18de7d458b"
+    },
+    {
+      "name": "zero_values_omitted",
+      "input": {
+        "tier": "starter",
+        "monthly_credits": 0,
+        "per_query_cost": 0,
+        "overage_multiplier": 0,
+        "currency": ""
+      },
+      "canonical": "{\"tier\":\"starter\"}",
+      "sha256_hex": "c70896f8072b6d58da4bbd345aa40e7aa8e043356619aac01661ccd463889d9a"
+    }
+  ]
+}

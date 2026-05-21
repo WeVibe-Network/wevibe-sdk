@@ -1,0 +1,32 @@
+[package]
+name    = "wevibe-sdk-core"
+version = "0.1.0"
+edition = "2021"
+license     = "Apache-2.0"
+description = "Crypto primitives for WeVibe Network — Ed25519, X25519, AES-256-GCM, HKDF epoch key derivation"
+repository  = "https://github.com/WeVibe-Network/wevibe-sdk"
+homepage    = "https://github.com/WeVibe-Network/wevibe-sdk"
+readme      = "../../README.md"
+keywords    = ["cryptography", "e2ee", "wevibe-network", "key-derivation"]
+categories  = ["cryptography"]
+
+[dependencies]
+bip39           = { workspace = true }
+ed25519-dalek = { workspace = true }
+x25519-dalek  = { workspace = true }
+aes-gcm       = { workspace = true }
+hkdf          = { workspace = true }
+sha2          = { workspace = true }
+hmac          = { workspace = true }
+secrecy       = { workspace = true }
+zeroize       = { workspace = true }
+rand          = { workspace = true }
+rand_core     = { workspace = true }
+hex           = { workspace = true }
+thiserror     = { workspace = true }
+serde         = { workspace = true }
+k256          = { workspace = true }
+
+[dev-dependencies]
+serde_json = { workspace = true }
+hex        = { workspace = true }

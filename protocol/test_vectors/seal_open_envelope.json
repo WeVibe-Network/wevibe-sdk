@@ -1,0 +1,23 @@
+[
+  {
+    "description": "Empty plaintext with fixed recipient keypair",
+    "recipient_x25519_privkey_hex": "0000000000000000000000000000000000000000000000000000000000000001",
+    "recipient_x25519_pubkey_hex": "fd3384e132ad02a56c78f45547ee40038dc79002b90d29ed90e08eee762ae715",
+    "plaintext_hex": "",
+    "note": "envelope uses random ephemeral key; roundtrip test only: open_envelope(seal_to_pubkey(p, pub), priv) == p"
+  },
+  {
+    "description": "32-byte zero plaintext, fixed recipient keypair",
+    "recipient_x25519_privkey_hex": "0000000000000000000000000000000000000000000000000000000000000001",
+    "recipient_x25519_pubkey_hex": "fd3384e132ad02a56c78f45547ee40038dc79002b90d29ed90e08eee762ae715",
+    "plaintext_hex": "0000000000000000000000000000000000000000000000000000000000000000",
+    "note": "envelope uses random ephemeral key; roundtrip test only"
+  },
+  {
+    "description": "Short non-empty plaintext with all-zero recipient keypair",
+    "recipient_x25519_privkey_hex": "0101010101010101010101010101010101010101010101010101010101010101",
+    "recipient_x25519_pubkey_hex": "a4e09292b651c278b9772c569f5fa9bb13d906b46ab68c9df9dc2b4409f8a209",
+    "plaintext_hex": "deadbeef",
+    "note": "envelope uses random ephemeral key; roundtrip test only"
+  }
+]

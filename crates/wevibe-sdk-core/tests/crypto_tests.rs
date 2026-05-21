@@ -10,39 +10,56 @@ fn test_epoch_key_derivation_vectors() {
         env!("CARGO_MANIFEST_DIR"),
         "/../../protocol/test_vectors/epoch_key_derivation.json"
     );
-    let data: Vec<Value> = serde_json::from_str(
+    let mut data: Vec<Value> = serde_json::from_str(
         &fs::read_to_string(path)
             .expect("epoch_key_derivation.json not found — run from wevibe-sdk workspace root"),
     )
     .unwrap();
 
-    for vector in &data {
+    let regen = std::env::var("REGEN_VECTORS").is_ok();
+
+    for vector in data.iter_mut() {
         let master_hex = vector["master_key_hex"].as_str().unwrap();
         let epoch = vector["epoch"].as_u64().unwrap() as u32;
-        let exp_enc = vector["expected_enc_key_hex"].as_str().unwrap();
-        let exp_search = vector["expected_search_key_hex"].as_str().unwrap();
-        let exp_audit = vector["expected_audit_key_hex"].as_str().unwrap();
 
         let master: [u8; 32] = hex::decode(master_hex).unwrap().try_into().unwrap();
         let keys = derive_epoch_keys(&master, epoch);
 
-        assert_eq!(
-            hex::encode(keys.enc_key),
-            exp_enc,
-            "enc_key mismatch for epoch {} — HKDF salt is wrong",
-            epoch
-        );
-        assert_eq!(
-            hex::encode(keys.search_key),
-            exp_search,
-            "search_key mismatch for epoch {} — HKDF salt is wrong",
-            epoch
-        );
-        assert_eq!(
-            hex::encode(keys.audit_key),
-            exp_audit,
-            "audit_key mismatch for epoch {} — HKDF salt is wrong",
-            epoch
+        if regen {
+            vector["expected_enc_key_hex"] = Value::String(hex::encode(keys.enc_key));
+            vector["expected_search_key_hex"] = Value::String(hex::encode(keys.search_key));
+            vector["expected_audit_key_hex"] = Value::String(hex::encode(keys.audit_key));
+        } else {
+            let exp_enc = vector["expected_enc_key_hex"].as_str().unwrap();
+            let exp_search = vector["expected_search_key_hex"].as_str().unwrap();
+            let exp_audit = vector["expected_audit_key_hex"].as_str().unwrap();
+
+            assert_eq!(
+                hex::encode(keys.enc_key),
+                exp_enc,
+                "enc_key mismatch for epoch {} — set REGEN_VECTORS=1 cargo test test_epoch_key_derivation_vectors -- --exact to bless new output",
+                epoch
+            );
+            assert_eq!(
+                hex::encode(keys.search_key),
+                exp_search,
+                "search_key mismatch for epoch {} — set REGEN_VECTORS=1 cargo test test_epoch_key_derivation_vectors -- --exact to bless new output",
+                epoch
+            );
+            assert_eq!(
+                hex::encode(keys.audit_key),
+                exp_audit,
+                "audit_key mismatch for epoch {} — set REGEN_VECTORS=1 cargo test test_epoch_key_derivation_vectors -- --exact to bless new output",
+                epoch
+            );
+        }
+    }
+
+    if regen {
+        fs::write(path, serde_json::to_string_pretty(&data).unwrap()).unwrap();
+        eprintln!(
+            "REGEN_VECTORS=1 cargo test test_epoch_key_derivation_vectors -- --exact: rewrote epoch_key_derivation.json ({} vectors)",
+            data.len()
         );
     }
 }

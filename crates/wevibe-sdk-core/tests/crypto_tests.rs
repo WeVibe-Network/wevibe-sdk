@@ -65,14 +65,134 @@ fn test_epoch_key_derivation_vectors() {
 }
 
 #[test]
+fn test_fee_model_hash_vectors() {
+    let path = concat!(
+        env!("CARGO_MANIFEST_DIR"),
+        "/../../protocol/test_vectors/fee_model_hash.json"
+    );
+    let mut data: Value = serde_json::from_str(&fs::read_to_string(path).unwrap()).unwrap();
+
+    let regen = std::env::var("REGEN_VECTORS").is_ok();
+    let vectors = data["vectors"].as_array_mut().unwrap();
+    let vec_count = vectors.len();
+
+    for vector in vectors.iter_mut() {
+        let canonical = vector["canonical"].as_str().unwrap();
+        let expected_hash = vector["sha256_hex"].as_str().unwrap().to_string();
+
+        let canonical_bytes = canonical.as_bytes();
+        use sha2::{Sha256, Digest};
+        let mut hasher = Sha256::new();
+        hasher.update(canonical_bytes);
+        let result = hasher.finalize();
+        let actual_hash = hex::encode(result);
+
+        if regen {
+            vector["sha256_hex"] = Value::String(actual_hash);
+        } else {
+            assert_eq!(
+                actual_hash, expected_hash,
+                "fee_model_hash mismatch — set REGEN_VECTORS=1 cargo test test_fee_model_hash_vectors -- --exact to bless new output"
+            );
+        }
+    }
+
+    if regen {
+        let out = serde_json::to_string_pretty(&data).unwrap();
+        fs::write(path, out).unwrap();
+        eprintln!(
+            "REGENERATED: {}/../../protocol/test_vectors/fee_model_hash.json ({} vectors)",
+            env!("CARGO_MANIFEST_DIR"),
+            vec_count
+        );
+    }
+}
+
+#[test]
+fn test_mnemonic_roundtrip_vectors() {
+    let path = concat!(
+        env!("CARGO_MANIFEST_DIR"),
+        "/../../protocol/test_vectors/mnemonic_roundtrip.json"
+    );
+    let mut data: Value = serde_json::from_str(&fs::read_to_string(path).unwrap()).unwrap();
+
+    let regen = std::env::var("REGEN_VECTORS").is_ok();
+    let vectors = data["vectors"].as_array_mut().unwrap();
+    let vec_count = vectors.len();
+
+    for vector in vectors.iter_mut() {
+        let master_hex = vector["master_key_hex"].as_str().unwrap();
+        let expected_phrase = vector["expected_phrase"].as_str().unwrap().to_string();
+
+        let master: [u8; 32] = hex::decode(master_hex).unwrap().try_into().unwrap();
+        let actual_phrase = master_key_to_mnemonic(&master).unwrap();
+
+        if regen {
+            vector["expected_phrase"] = Value::String(actual_phrase);
+        } else {
+            assert_eq!(
+                actual_phrase, expected_phrase,
+                "mnemonic mismatch — set REGEN_VECTORS=1 cargo test test_mnemonic_roundtrip_vectors -- --exact to bless new output"
+            );
+        }
+    }
+
+    if regen {
+        let out = serde_json::to_string_pretty(&data).unwrap();
+        fs::write(path, out).unwrap();
+        eprintln!(
+            "REGENERATED: {}/../../protocol/test_vectors/mnemonic_roundtrip.json ({} vectors)",
+            env!("CARGO_MANIFEST_DIR"),
+            vec_count
+        );
+    }
+}
+
+#[test]
+fn test_shamir_roundtrip_vectors() {
+    let path = concat!(
+        env!("CARGO_MANIFEST_DIR"),
+        "/../../protocol/test_vectors/shamir_roundtrip.json"
+    );
+    let mut data: Value = serde_json::from_str(&fs::read_to_string(path).unwrap()).unwrap();
+
+    let regen = std::env::var("REGEN_VECTORS").is_ok();
+    let vectors = data["vectors"].as_array_mut().unwrap();
+    let vec_count = vectors.len();
+
+    for vector in vectors.iter_mut() {
+        let secret_hex = vector["secret_hex"].as_str().unwrap();
+        let threshold = vector["threshold"].as_u64().unwrap() as u8;
+        let total_shares = vector["total_shares"].as_u64().unwrap() as u8;
+
+        let secret: [u8; 32] = hex::decode(secret_hex).unwrap().try_into().unwrap();
+        let shares = split_secret(&secret, threshold, total_shares);
+        let recovered = reconstruct_secret(&shares[0..2].to_vec(), threshold).unwrap();
+        assert_eq!(recovered, secret, "shamir roundtrip failed for {}", secret_hex);
+    }
+
+    if regen {
+        let out = serde_json::to_string_pretty(&data).unwrap();
+        fs::write(path, out).unwrap();
+        eprintln!(
+            "REGENERATED: {}/../../protocol/test_vectors/shamir_roundtrip.json ({} vectors)",
+            env!("CARGO_MANIFEST_DIR"),
+            vec_count
+        );
+    }
+}
+
+#[test]
 fn test_seal_open_envelope_vectors() {
     let path = concat!(
         env!("CARGO_MANIFEST_DIR"),
         "/../../protocol/test_vectors/seal_open_envelope.json"
     );
-    let data: Vec<Value> = serde_json::from_str(&fs::read_to_string(path).unwrap()).unwrap();
+    let mut data: Vec<Value> = serde_json::from_str(&fs::read_to_string(path).unwrap()).unwrap();
 
-    for vector in &data {
+    let regen = std::env::var("REGEN_VECTORS").is_ok();
+
+    for vector in data.iter_mut() {
         let priv_hex = vector["recipient_x25519_privkey_hex"].as_str().unwrap();
         let plaintext_hex = vector["plaintext_hex"].as_str().unwrap();
 
@@ -95,12 +215,26 @@ fn test_seal_open_envelope_vectors() {
             .get("recipient_x25519_pubkey_hex")
             .and_then(|v| v.as_str())
         {
-            assert_eq!(
-                hex::encode(pubkey),
-                expected_pub_hex,
-                "stored pubkey does not match derived pubkey — vector file is stale"
-            );
+            let actual_pub_hex = hex::encode(pubkey);
+            if regen {
+                vector["recipient_x25519_pubkey_hex"] = Value::String(actual_pub_hex.clone());
+            } else {
+                assert_eq!(
+                    actual_pub_hex, expected_pub_hex,
+                    "stored pubkey does not match derived pubkey — set REGEN_VECTORS=1 cargo test test_seal_open_envelope_vectors -- --exact to bless new output"
+                );
+            }
         }
+    }
+
+    if regen {
+        let out = serde_json::to_string_pretty(&data).unwrap();
+        fs::write(path, out).unwrap();
+        eprintln!(
+            "REGENERATED: {}/../../protocol/test_vectors/seal_open_envelope.json ({} vectors)",
+            env!("CARGO_MANIFEST_DIR"),
+            data.len()
+        );
     }
 }
 

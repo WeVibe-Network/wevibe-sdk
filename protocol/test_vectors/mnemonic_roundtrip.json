@@ -1,23 +1,25 @@
 {
   "description": "BIP39 mnemonic roundtrip test vectors for WeVibe Network",
   "note": "24-word English mnemonics from 256-bit (32-byte) entropy. Roundtrip: entropy → phrase → entropy must be lossless.",
+  "regenerated_at": "2026-05-21",
+  "regenerated_by": "WeVibe-CO-006",
   "vectors": [
     {
-      "name": "all_zeros",
-      "master_key_hex": "0000000000000000000000000000000000000000000000000000000000000000",
       "expected_phrase": "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon art",
+      "master_key_hex": "0000000000000000000000000000000000000000000000000000000000000000",
+      "name": "all_zeros",
       "word_count": 24
     },
     {
-      "name": "all_ones",
-      "master_key_hex": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
       "expected_phrase": "zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo vote",
+      "master_key_hex": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+      "name": "all_ones",
       "word_count": 24
     },
     {
-      "name": "sequential",
-      "master_key_hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
       "expected_phrase": "abandon amount liar amount expire adjust cage candy arch gather drum bullet absurd math era live bid rhythm alien crouch range attend journey unaware",
+      "master_key_hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+      "name": "sequential",
       "word_count": 24
     }
   ]

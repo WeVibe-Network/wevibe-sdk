@@ -11,9 +11,7 @@ This module is the sole owner of ~/.wevibe/pending_vault/.
 from __future__ import annotations
 
 import json
-import os
 from dataclasses import dataclass, asdict
-from datetime import datetime, timezone
 from pathlib import Path
 
 VAULT_DIR = Path.home() / ".wevibe" / "pending_vault"
@@ -37,35 +35,13 @@ def store_pending_dek(
     dek: bytes,
     task_preview: str,
 ) -> None:
-    """Encrypt and store a pending submission DEK.
-
-    TODO: implement
-        from wevibe_sdk.crypto import encrypt_symmetric
-        from wevibe_sdk.key_store import get_device_key
-        import base64
-
-        device_key = get_device_key()
-        encrypted_dek = encrypt_symmetric(dek, device_key)
-        entry = PendingEntry(
-            submission_hash=submission_hash,
-            org_id=org_id,
-            epoch_id=epoch_id,
-            encrypted_dek=base64.b64encode(encrypted_dek).decode(),
-            task_preview=task_preview[:100],
-            created_at=datetime.now(timezone.utc).isoformat(),
-            status="pending",
-        )
-        _write_entry(entry)
-    """
-    raise NotImplementedError("TODO: store_pending_dek")
+    """Encrypt and store a pending submission DEK."""
+    raise NotImplementedError("Pending DEK storage is not implemented yet")
 
 
 def load_pending_dek(submission_hash: str) -> bytes | None:
-    """Decrypt and return a pending submission DEK. Returns None if not found.
-
-    TODO: implement (inverse of store_pending_dek)
-    """
-    raise NotImplementedError("TODO: load_pending_dek")
+    """Decrypt and return a pending submission DEK, or None when missing."""
+    raise NotImplementedError("Pending DEK loading is not implemented yet")
 
 
 def list_pending(org_id: str | None = None) -> list[PendingEntry]:

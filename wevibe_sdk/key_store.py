@@ -12,13 +12,7 @@ Dependencies:
 
 from __future__ import annotations
 
-import base64
 import json
-import os
-
-# TODO: import keyring
-# import keyring
-# from keyring.errors import NoKeyringError
 
 SERVICE_PREFIX = "wevibe-network"
 
@@ -28,46 +22,28 @@ def get_device_key() -> bytes:
 
     Generated on first call, stored in OS keychain.
     This key encrypts session buffers and the pending vault on disk.
-
-    TODO: implement
-        import keyring
-        stored = keyring.get_password(SERVICE_PREFIX, "device-key-v1")
-        if stored:
-            return base64.b64decode(stored)
-        key = os.urandom(32)
-        keyring.set_password(SERVICE_PREFIX, "device-key-v1", base64.b64encode(key).decode())
-        return key
     """
-    raise NotImplementedError("TODO: get_device_key")
+    raise NotImplementedError("Device key persistence is not implemented yet")
 
 
 def store_key_envelope(org_id: str, envelope_type: str, blob: bytes) -> None:
     """Store a sealed key envelope for an org.
 
     envelope_type: "enc_bundle" | "search_bundle" | "audit_bundle" | "mod_priv"
-
-    TODO: implement using keyring
-        account = f"org-{org_id}-{envelope_type}"
-        keyring.set_password(SERVICE_PREFIX, account, base64.b64encode(blob).decode())
     """
-    raise NotImplementedError("TODO: store_key_envelope")
+    raise NotImplementedError("Key envelope persistence is not implemented yet")
 
 
 def load_key_envelope(org_id: str, envelope_type: str) -> bytes | None:
-    """Load a sealed key envelope. Returns None if not found.
-
-    TODO: implement
-    """
-    raise NotImplementedError("TODO: load_key_envelope")
+    """Load a sealed key envelope. Return None when no envelope exists."""
+    raise NotImplementedError("Key envelope loading is not implemented yet")
 
 
 def list_org_ids() -> list[str]:
     """Return all org IDs for which we have stored key envelopes.
 
-    TODO: implement — keyring does not natively list by prefix on all backends.
-    Maintain a separate plaintext index file at ~/.wevibe/orgs.json
-    that lists joined org IDs. The sensitive material (keys) stays in keychain;
-    the index (just org IDs, not keys) can be a plain JSON file.
+    The keyring API cannot list accounts by prefix consistently across backends,
+    so org IDs are tracked in a local index at ~/.wevibe/orgs.json.
     """
     index_path = _orgs_index_path()
     if not index_path.exists():

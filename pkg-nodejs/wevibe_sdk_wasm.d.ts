@@ -13,6 +13,8 @@ export function generate_dek(): Uint8Array;
 
 export function generate_identity(): Array<any>;
 
+export function generate_identity_from_seed(ed_seed: Uint8Array): Array<any>;
+
 export function master_key_to_mnemonic(master_key: Uint8Array): string;
 
 export function mnemonic_to_master_key(phrase: string): Uint8Array;

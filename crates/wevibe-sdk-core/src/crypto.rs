@@ -144,6 +144,22 @@ pub fn generate_identity() -> ([u8; 32], [u8; 32], [u8; 32], [u8; 32]) {
     (ed_privkey, ed_pubkey, x_privkey, x_pubkey_bytes)
 }
 
+pub fn generate_identity_from_seed(ed_seed: &[u8; 32]) -> ([u8; 32], [u8; 32], [u8; 32], [u8; 32]) {
+    let ed_signing = SigningKey::from_bytes(ed_seed);
+    let ed_privkey: [u8; 32] = *ed_seed;
+    let ed_pubkey: [u8; 32] = ed_signing.verifying_key().to_bytes();
+
+    let hk = Hkdf::<Sha256>::new(Some(&[]), ed_seed);
+    let mut x_privkey = [0u8; 32];
+    hk.expand(b"wevibe-x25519-v1", &mut x_privkey)
+        .expect("HKDF expand failed");
+
+    let x_secret = StaticSecret::from(x_privkey);
+    let x_pubkey_bytes: [u8; 32] = *X25519PublicKey::from(&x_secret).as_bytes();
+
+    (ed_privkey, ed_pubkey, x_privkey, x_pubkey_bytes)
+}
+
 pub fn sign(privkey: &[u8; 32], data: &[u8]) -> Result<[u8; 64], CryptoError> {
     let signing_key = SigningKey::from_bytes(privkey);
     let signature = signing_key.sign(data);

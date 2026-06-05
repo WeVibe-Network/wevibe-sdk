@@ -267,6 +267,38 @@ fn test_identities_unique() {
 }
 
 #[test]
+fn test_generate_identity_from_seed_deterministic() {
+    use ed25519_dalek::SigningKey;
+    use hkdf::Hkdf;
+    use sha2::Sha256;
+    use x25519_dalek::{PublicKey as X25519PublicKey, StaticSecret};
+
+    let seed = [0x42u8; 32];
+
+    let first = generate_identity_from_seed(&seed);
+    let second = generate_identity_from_seed(&seed);
+
+    assert_eq!(first.0, second.0);
+    assert_eq!(first.1, second.1);
+    assert_eq!(first.2, second.2);
+    assert_eq!(first.3, second.3);
+
+    assert_eq!(first.0, seed);
+
+    let expected_ed_pub = SigningKey::from_bytes(&seed).verifying_key().to_bytes();
+    assert_eq!(first.1, expected_ed_pub);
+
+    let hk = Hkdf::<Sha256>::new(Some(&[]), &seed);
+    let mut expected_x_priv = [0u8; 32];
+    hk.expand(b"wevibe-x25519-v1", &mut expected_x_priv)
+        .expect("HKDF expand failed");
+    assert_eq!(first.2, expected_x_priv);
+
+    let expected_x_pub = *X25519PublicKey::from(&StaticSecret::from(expected_x_priv)).as_bytes();
+    assert_eq!(first.3, expected_x_pub);
+}
+
+#[test]
 fn test_sign_returns_64_bytes() {
     let (ed_priv, _, _, _) = generate_identity();
     let sig = sign(&ed_priv, b"test").unwrap();

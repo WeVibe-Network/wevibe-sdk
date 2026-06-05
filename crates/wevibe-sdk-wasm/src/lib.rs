@@ -13,6 +13,21 @@ pub fn generate_identity() -> js_sys::Array {
 }
 
 #[wasm_bindgen]
+pub fn generate_identity_from_seed(ed_seed: &[u8]) -> Result<js_sys::Array, JsError> {
+    let ed_seed: [u8; 32] = ed_seed
+        .try_into()
+        .map_err(|_| JsError::new("ed_seed must be 32 bytes"))?;
+    let (ed_priv, ed_pub, x_priv, x_pub) = crypto::generate_identity_from_seed(&ed_seed);
+
+    let arr = js_sys::Array::new();
+    arr.push(&js_sys::Uint8Array::from(ed_priv.as_ref()));
+    arr.push(&js_sys::Uint8Array::from(ed_pub.as_ref()));
+    arr.push(&js_sys::Uint8Array::from(x_priv.as_ref()));
+    arr.push(&js_sys::Uint8Array::from(x_pub.as_ref()));
+    Ok(arr)
+}
+
+#[wasm_bindgen]
 pub fn sign(privkey: &[u8], data: &[u8]) -> Result<js_sys::Uint8Array, JsError> {
     let privkey: [u8; 32] = privkey
         .try_into()

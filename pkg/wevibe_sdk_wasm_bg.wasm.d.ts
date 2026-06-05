@@ -6,6 +6,7 @@ export const decrypt_symmetric: (a: number, b: number, c: number, d: number) => 
 export const derive_epoch_keys: (a: number, b: number, c: number) => [number, number, number];
 export const encrypt_symmetric: (a: number, b: number, c: number, d: number) => [number, number, number];
 export const generate_identity: () => any;
+export const generate_identity_from_seed: (a: number, b: number) => [number, number, number];
 export const master_key_to_mnemonic: (a: number, b: number) => [number, number, number, number];
 export const mnemonic_to_master_key: (a: number, b: number) => [number, number, number];
 export const open_envelope: (a: number, b: number, c: number, d: number) => [number, number, number];

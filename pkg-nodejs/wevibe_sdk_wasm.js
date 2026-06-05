@@ -100,6 +100,21 @@ function generate_identity() {
 exports.generate_identity = generate_identity;
 
 /**
+ * @param {Uint8Array} ed_seed
+ * @returns {Array<any>}
+ */
+function generate_identity_from_seed(ed_seed) {
+    const ptr0 = passArray8ToWasm0(ed_seed, wasm.__wbindgen_malloc);
+    const len0 = WASM_VECTOR_LEN;
+    const ret = wasm.generate_identity_from_seed(ptr0, len0);
+    if (ret[2]) {
+        throw takeFromExternrefTable0(ret[1]);
+    }
+    return takeFromExternrefTable0(ret[0]);
+}
+exports.generate_identity_from_seed = generate_identity_from_seed;
+
+/**
  * @param {Uint8Array} master_key
  * @returns {string}
  */

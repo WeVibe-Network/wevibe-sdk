@@ -12,6 +12,10 @@ updates:
       prefix: "deps"
     labels:
       - "dependencies"
+    # secrecy 0.10+ removed the `alloc` feature this crate relies on; bumping it
+    # requires a deliberate code migration, so it is excluded from automatic updates.
+    ignore:
+      - dependency-name: "secrecy"
     groups:
       cargo-root:
         patterns:

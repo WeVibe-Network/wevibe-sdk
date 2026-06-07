@@ -12,10 +12,11 @@ updates:
       prefix: "deps"
     labels:
       - "dependencies"
-    # secrecy 0.10+ removed the `alloc` feature this crate relies on; bumping it
-    # requires a deliberate code migration, so it is excluded from automatic updates.
+    # These crates require deliberate code migrations and are excluded from automation:
+    #   secrecy 0.10+ removed the `alloc` feature; getrandom 0.3+ removed the `js` feature (WASM).
     ignore:
       - dependency-name: "secrecy"
+      - dependency-name: "getrandom"
     groups:
       cargo-root:
         patterns:

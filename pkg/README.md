@@ -1,10 +1,9 @@
-# wevibe-sdk
+# wevibe-sdk (web package)
 
-Part of [WeVibe Network](https://github.com/WeVibe-Network).
+This directory contains the generated `wasm-pack` web output for `wevibe-sdk-wasm`.
 
-This repository is being initialized as part of Sprint 28. Full
-content lands in subsequent change orders (CO-282 through CO-285).
+- Target: browser/web bundlers
+- Source crate: `crates/wevibe-sdk-wasm`
+- Regeneration: run `wasm-pack` against the WASM crate from this repository
 
-## License
-
-Apache-2.0. See LICENSE in the populated version.
+Treat files in this directory as build artifacts derived from the Rust source, not as the primary implementation source.

@@ -1,6 +1,3 @@
-# Worker AI operating context — local only, never committed
-AGENTS.md
-SESSIONCONTINUANCE.md
 
 # OS artifacts
 .DS_Store
@@ -33,3 +30,9 @@ __pycache__/
 # WASM artifacts must remain tracked
 !pkg/
 !pkg-nodejs/
+
+# Local orchestration docs (never committed)
+AGENTS.md
+MANAGER.md
+WORKER.md
+SESSIONCONTINUANCE.md

@@ -39,7 +39,7 @@ Current primitives include:
 - BIP39 recovery phrase support
 - sealed-envelope key distribution patterns
 
-The dashboard consumes the generated WASM bundle from this repository (`pkg/` and `pkg-nodejs/`). A Python binding is also present for non-JavaScript client surfaces.
+The dashboard consumes the generated WASM bundle from this repository (`pkg/` and `pkg-nodejs/`).
 
 ## Getting started
 

@@ -49,10 +49,10 @@ pub struct ModerationQueueEntry {
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 #[serde(rename_all = "snake_case")]
 pub enum SubmissionStatus {
-    Pending,
-    Approved,
+    PendingKeyword,
+    PendingChain,
+    Committed,
     Denied,
-    Escalated,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

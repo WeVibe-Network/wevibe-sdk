@@ -12,7 +12,7 @@ wevibe-sdk provides the cryptographic primitives and state machinery required fo
 2. **Envelope sealing** — wraps DEKs to moderation and retrieval keys with X25519 + AES-256-GCM.
 3. **Ciphertext streaming** — chunked encryption with Merkle commitments for large payloads.
 4. **Keyword hashing** — deterministic HMAC tokens for local retrieval indexes.
-5. **Attestation signing** — ed25519 signatures for serve attestation batches.
+5. **Attestation signing** — ed25519 signatures for serve receipt batches.
 
 ## API Structure
 
@@ -20,7 +20,7 @@ wevibe-sdk provides the cryptographic primitives and state machinery required fo
 - `sdk::epoch` — HKDF derivation, epoch rotation, contest stake utilities.
 - `sdk::crypto` — AES-GCM encryption/decryption, Merkle commitment builder.
 - `sdk::keywords` — tokenisation and weighting helpers.
-- `sdk::attestation` — serve attestation envelope builder.
+- `sdk::attestation` — serve receipt envelope builder.
 - `sdk::wasm` — wasm-bindgen exports for Node/Browser consumers.
 
 ## Security Considerations

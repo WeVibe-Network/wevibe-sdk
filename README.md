@@ -13,73 +13,95 @@
 
 ---
 
-Rust and WASM cryptography SDK for WeVibe clients.
+The shared cryptographic substrate for WeVibe clients: one Rust implementation, compiled natively for local TS/Rust tooling and to WebAssembly for the browser.
 
 ## Overview
 
-`wevibe-sdk` is a Rust workspace that provides the shared cryptographic foundation used across WeVibe client applications.
+`wevibe-sdk` is a Rust workspace that provides the single source of truth for key derivation and encryption across the WeVibe client stack — the web dashboard, which consumes the WASM build, and the local TS/Rust clients, which consume the native core. Every client derives identity keys, seals envelopes, and splits secrets through the same auditable code path; no primitive is re-implemented on any consumer side. If a format ever changes, it changes in exactly one place.
 
-The workspace currently includes:
+**Status: alpha.** The core is implemented and consumed by real clients today, but APIs may still evolve as the network hardens.
 
-- `crates/wevibe-sdk-core`: core crypto, identity, types, and error handling.
-- `crates/wevibe-sdk-wasm`: WebAssembly bindings for browser and JavaScript clients.
+### Workspace layout
 
-This project is in active alpha. The core cryptographic functionality is implemented and used, but APIs may still evolve as the network hardens and client integration expands.
+| Crate | Role |
+|---|---|
+| `crates/wevibe-sdk-core` | Native Rust core: crypto primitives, identity, secp256k1 pre-identity, types, errors |
+| `crates/wevibe-sdk-wasm` | Thin `wasm-bindgen` bindings over the core (`cdylib` + `rlib`) |
 
-## Role in the WeVibe Network
+## What's inside
 
-This SDK is the common crypto layer for the client stack, including MCP and dashboard integrations.
+Primitives are implemented directly in `wevibe-sdk-core`; the WASM crate exposes a 1:1 subset of them (listed in [WASM surface](#wasm-surface)).
 
-Current primitives include:
+- **Ed25519 signing** — keypair generation, sign, verify (`ed25519-dalek`)
+- **X25519 key agreement** — static key generation and one-shot ephemeral–static ECDH sealing (`x25519-dalek`)
+- **AES-256-GCM** — symmetric encryption with random 12-byte nonces, and envelope sealing (ephemeral X25519 → HKDF → AES-256-GCM) (`aes-gcm`)
+- **HKDF-SHA256 key derivation** (`hkdf`) with versioned info strings:
+  - seed → associated X25519 key, info `wevibe-x25519-v1`
+  - ECDH shared secret → envelope key, info `wevibe-envelope-v1`
+  - master key + epoch → `enc` / `search` / `audit` keys, infos `wevibe-enc-` / `wevibe-search-` / `wevibe-audit-` + big-endian epoch
+- **HMAC-SHA256 blind search tokens** (`hmac`)
+- **BIP39 mnemonics** — 32-byte master key ⇔ 24-word recovery phrase (`bip39`)
+- **Shamir secret sharing** — t-of-n split/reconstruct over 32-byte secrets, hand-rolled GF(256), no external dependency
+- **secp256k1 `PreIdentity`** — random or deterministic key material; 32-byte BE scalar secret, 33-byte compressed SEC1 public key (`k256`)
+- **DEK generation** — fresh random 32-byte data-encryption keys
 
-- keypair and identity foundations
-- AES-256-GCM symmetric encryption
-- x25519 and ed25519 key operations
-- HKDF-based key derivation
-- BIP39 recovery phrase support
-- sealed-envelope key distribution patterns
+`identity.rs` wraps the keypairs in an `Identity` trait: `LocalIdentity` holds the full Ed25519 + X25519 material locally (zeroized on drop); `SolanaIdentity` is a pubkey-only view that refuses to sign locally.
 
-The dashboard consumes the generated WASM bundle from this repository (`pkg/` and `pkg-nodejs/`).
+### Identity model
+
+Identity is Ed25519-first: a 32-byte Ed25519 seed is the protocol identity, and the associated X25519 encryption keypair is derived deterministically from the same seed via HKDF (`wevibe-x25519-v1`). `generate_identity_from_seed` yields the full four-key identity (Ed25519 sign/verify pair + X25519 pair) from one seed. No wallet is required to join the network.
+
+### What this SDK is not
+
+Proxy re-encryption (PRE/Umbral) is **not** in this crate and is not a dependency. It lives in the sibling [wevibe-umbral](https://github.com/WeVibe-Network/wevibe-umbral) crate; `wevibe-sdk`'s contribution at that boundary is byte-compatible secp256k1 key material via `PreIdentity`.
+
+## WASM surface
+
+`wevibe-sdk-wasm` (npm package name `wevibe-sdk-wasm`, 0.1.0) exports 15 functions:
+
+`generate_identity` · `generate_identity_from_seed` · `sign` · `verify` · `seal_to_pubkey` · `open_envelope` · `encrypt_symmetric` · `decrypt_symmetric` · `derive_epoch_keys` · `compute_blind_token` · `generate_dek` · `master_key_to_mnemonic` · `mnemonic_to_master_key` · `splitSecret` · `reconstructSecret`
+
+Generated build outputs are committed and consumed directly:
+
+| Directory | Target |
+|---|---|
+| `pkg/` | browser |
+| `pkg-nodejs/` | Node.js |
+
+## Consumers
+
+The crates are unpublished — nothing is pushed to crates.io or npm. All consumption is by local path or vendoring inside the WeVibe workspace:
+
+- **wevibe-dashboard** (under `wevibe-server/`) — depends on `wevibe-sdk-wasm` via `file:./vendor/wevibe-sdk-wasm`, a vendored copy of `pkg/`
+- **wevibe-mcp** and **wevibe-mcp-exp** — load `pkg-nodejs/` from a sibling checkout at runtime
+- **wevibe-meta/tests** — depends on `wevibe-sdk-wasm` via `file:../../wevibe-sdk/pkg-nodejs`
 
 ## Getting started
 
-### Build
+Build the workspace:
 
 ```bash
 cargo build
-```
-
-Release build:
-
-```bash
 cargo build --release
 ```
 
-### Generate WASM artifacts
-
-This repository already includes generated outputs in `pkg/` and `pkg-nodejs/`.
-To regenerate bindings, use `wasm-pack` from the workspace as needed.
-
-## Testing
-
-Run the full workspace test suite:
+Run the test suite:
 
 ```bash
 cargo test
 ```
 
-## Configuration
+The suite includes cross-format vector tests checked against committed JSON fixtures under `protocol/test_vectors/` (epoch key derivation, envelope seal/open, Shamir roundtrip, mnemonic roundtrip). If you intentionally change derivation output, bless the fixtures with `REGEN_VECTORS=1 cargo test` and review the diff before committing.
 
-No runtime service configuration is required for the core Rust crates.
-For WASM consumers, use the generated package targets in `pkg/` (web) and `pkg-nodejs/` (Node.js).
+Regenerating the WASM artifacts is done with `wasm-pack` against `crates/wevibe-sdk-wasm`; there is no committed build script.
 
 ## Roadmap
 
-See [ROADMAP.md](./ROADMAP.md) for current status and upcoming work.
+Near-term direction is passkey-first onboarding on top of the existing seed-based identity model described above. It is not implemented yet; nothing in this README should be read as a committed API surface beyond what the code does today.
 
 ## License
 
-Apache-2.0. See [LICENSE](./LICENSE).
+Apache-2.0 — both crates. See [LICENSE](./LICENSE).
 
 ## Links
 
